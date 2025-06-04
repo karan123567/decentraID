@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
+import StudentSignIn from '../pages/StudentSignIn';
 export default function Navbar() {
   return (
     <nav className="bg-black text-white p-4 flex justify-between items-center shadow-md">

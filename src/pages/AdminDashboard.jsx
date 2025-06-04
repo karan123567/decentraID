@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import CryptoJS from "crypto-js";
-import students from "../components/fake_student_records_blockchain_certificates.json";
+import students from "../../fake_student_records_blockchain_certificates.json"
 import Select from "react-select"; // ✅ imported
-import './css/studentdashboard.css';
+// import './css/studentdashboard.css';
 import { HelpCircle, LogOut, HelpingHandIcon } from 'lucide-react';
 
 const UniversityDashboard = () => {
@@ -19,6 +19,18 @@ const UniversityDashboard = () => {
       return;
     }
 
+    
+  const generateSHA256Hash=async function generateSHA256Hash(message) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
+// Usage
+generateSHA256Hash("hash genrated").then(console.log("hash genratewd"));
     const reader = new FileReader();
     reader.onload = (e) => {
       const fileContent = e.target.result;
@@ -26,7 +38,7 @@ const UniversityDashboard = () => {
       const record = {
         ...selectedStudent,
         hash,
-        link: `https://yourapp.com/verify/${hash}`,
+        link: `https://yourapp.com/verify/${generateSHA256Hash}`,
         date: new Date().toLocaleDateString()
       };
       setRecords([...records, record]);
@@ -42,6 +54,7 @@ const UniversityDashboard = () => {
     value: student,
     label: `${student.Full_Name} (${student.Roll_Number})`
   }));
+
 
   return (
     <div className="parant">

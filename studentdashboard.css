@@ -1,0 +1,222 @@
+.parant{
+  width:auto;
+  background-color: white;
+  display:flex;
+  height:529px;
+}
+.left{
+  background-color: rgb(170, 169, 169);
+  width: 250px;
+  height: 529px;
+}
+.left h4{
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  font-weight: 800;
+  font-size:1.8rem;
+  color: black;
+  font-family:Verdana, Geneva, Tahoma, sans-serif;
+}
+.left h4 span{
+  position: relative;
+   top: -20px;
+  display: flex;
+  justify-content: center;
+  font-weight: 500;
+  font-size:1.8rem;
+  color: black;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+.line{
+  width:250px;
+   position: relative;
+   top: -30px;
+  height:2px;
+  background-color: rgb(0, 7, 7);
+}
+
+/* sidebar.css */
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  color: #e5e7eb; /* Tailwind's gray-200 */
+  font-size: 20px;
+}
+
+.sidebar-item:hover {
+  background-color: #1f2937; /* Tailwind's gray-800 */
+}
+.line2{
+   width:250px;
+   position: relative;
+   top: 30px;
+  height:2px;
+  background-color: rgb(0, 7, 7);
+}
+.D-info{
+  font-size: 1.2rem;
+  width:100%;
+ padding-left: 10px;
+ padding-right: -10px;
+  font-weight:500;
+}
+
+.headding{
+  padding-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;        /* centers horizontally */
+  justify-content: center;    /* centers vertically */
+  /* min-height: 100vh;         full height for vertical centering */
+  background-color: #f0f4f8;
+  padding: 20px;
+  width: 100%;
+}
+
+.welcome_sms {
+  background-color: #dff6ff;
+  padding: 15px 25px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.1);
+}
+
+.welcome_sms h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #0077cc;
+  font-weight: 600;
+}
+
+.data {
+  background-color: #fefefe;
+  border: 1px solid #ddefff;
+  border-radius: 12px;
+  padding: 25px 30px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.data p {
+  margin: 12px 0;
+  font-size: 16px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.data strong {
+  color: #005fa3;
+}
+
+
+
+/* admin dashboard section */
+
+/* === Form Section === */
+label {
+  font-weight: bold;
+  margin-right: 10px;
+  color: #0077cc;
+}
+
+select,
+input[type="file"] {
+  padding: 6px 10px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+button {
+  background-color: #0077cc;
+  color: white;
+  padding: 7px 15px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #005fa3;
+}
+
+/* === Message === */
+p {
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+/* === Table === */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 15px;
+}
+
+th,
+td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+  color: #0c6dce;
+}
+
+th {
+  background-color: #e6f4ff;
+  color: #005fa3;
+}
+
+body.dark-theme th {
+  background-color: #1f1f1f;
+  color: #93c5fd;
+}
+
+a {
+  color: #0077cc;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+.h3{
+  color: #0077cc;
+}
+
+/* === Responsive === */
+@media (max-width: 600px) {
+  .navbar ul {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  table,
+  th,
+  td {
+    font-size: 13px;
+  }
+}
+
+.parant1{
+  width:auto;
+  background-color: white;
+  display:flex;
+  /* height:529px; */
+  gap: 50px;
+}

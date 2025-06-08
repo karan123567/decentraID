@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CryptoJS from "crypto-js";
 import students from "../../fake_student_records_blockchain_certificates.json";
 import Select from "react-select";
+import { ethers } from "ethers";
+import { ABI, CONTRACT_ADDRESS } from "../Blockchain/contractConfig";
 import { HelpCircle, LogOut, HelpingHandIcon, Sun, Moon } from "lucide-react";
 
 const UniversityDashboard = () => {
@@ -10,6 +12,22 @@ const UniversityDashboard = () => {
   const [records, setRecords] = useState([]);
   const [message, setMessage] = useState("");
   const [darkMode, setDarkMode] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
+
+  // Connect MetaMask wallet
+  const connectWallet = async () => {
+    try {
+      if (!window.ethereum) return alert("MetaMask not found.");
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      setWalletAddress(accounts[0]);
+    } catch (err) {
+      console.error("Wallet connection failed", err);
+    }
+  };
+
+  useEffect(() => {
+    connectWallet();
+  }, []);
 
   const handleFileChange = (e) => setFile(e.target.files[0]);
 
@@ -20,7 +38,7 @@ const UniversityDashboard = () => {
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const fileContent = e.target.result;
       const hash = CryptoJS.SHA256(fileContent).toString();
 
@@ -32,16 +50,29 @@ const UniversityDashboard = () => {
         return;
       }
 
-      const record = {
-        ...selectedStudent,
-        hash,
-        link: `https://yourapp.com/verify/${hash}`,
-        date: new Date().toLocaleDateString(),
-      };
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
-      setRecords([...records, record]);
-      setMessage("✅ Certificate uploaded & hash generated!");
+        const tx = await contract.uploadCertificate(selectedStudent.wallet, `0x${hash}`);
+        await tx.wait();
+
+        const record = {
+          ...selectedStudent,
+          hash,
+          link: `https://yourapp.com/verify/${hash}`,
+          date: new Date().toLocaleDateString(),
+        };
+
+        setRecords([...records, record]);
+        setMessage("✅ Certificate hash uploaded to blockchain!");
+      } catch (err) {
+        console.error("Upload failed:", err);
+        setMessage("❌ Failed to upload certificate hash.");
+      }
     };
+
     reader.readAsBinaryString(file);
   };
 
@@ -74,7 +105,9 @@ const UniversityDashboard = () => {
 
       {/* Main Content */}
       <main className="flex-1 p-8">
-        <h2 className="text-2xl font-bold mb-6 text-blue-700 dark:text-blue-300">University Certificate Upload Portal</h2>
+        <h2 className="text-2xl font-bold mb-6 text-blue-700 dark:text-blue-300">
+          University Certificate Upload Portal
+        </h2>
 
         <div className="mb-6">
           <label className="font-semibold block mb-2">🎓 Select Student</label>
@@ -100,12 +133,12 @@ const UniversityDashboard = () => {
             onClick={handleUpload}
             className="ml-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
           >
-            Upload
+            Upload to Blockchain
           </button>
         </div>
 
         {message && (
-          <div className={`mb-4 font-medium ${message.includes('Duplicate') ? 'text-yellow-400' : 'text-green-400'}`}>
+          <div className={`mb-4 font-medium ${message.includes('Duplicate') || message.includes('Failed') ? 'text-yellow-400' : 'text-green-400'}`}>
             {message}
           </div>
         )}

@@ -1,125 +1,107 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 
 const StudentLogin = () => {
   const [rollNo, setRollNo] = useState("");
-  const [error, setError] = useState("");
   const [walletAddress, setWalletAddress] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const connectWallet = async () => {
-    if (!window.ethereum) {
-      alert("Please install MetaMask.");
-      return;
-    }
-
+    if (!window.ethereum) return alert("Please install MetaMask.");
     try {
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       setWalletAddress(accounts[0]);
     } catch (err) {
-      setError("MetaMask connection failed.");
+      setError("MetaMask connection failed");
     }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
-    if (!walletAddress) {
-      alert("Please connect your MetaMask wallet.");
-      return;
-    }
+    if (!walletAddress) return alert("Connect MetaMask first");
 
     try {
-      const response = await axios.post("http://localhost:5000/api/students/login", {
+      const res = await axios.post("http://localhost:5000/api/students/login", {
         rollNo,
         wallet: walletAddress,
       });
-
-      if (response.status === 200) {
-        localStorage.setItem("studentName", response.data.name);
-        navigate("/student-dashboard");
-      }
+      localStorage.setItem("studentName", res.data.name);
+      navigate("/student-dashboard");
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed.");
+      setError(err.response?.data?.error || "Login failed");
     }
-useEffect(() => {
-  document.body.style.overflow = "hidden";
-  return () => {
-    document.body.style.overflow = "auto"; // reset on leaving login page
   };
-}, []);
 
-  };
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
 
   return (
-    <div className="h-screen w-screen flex overflow-hidden">
-      {/* Left: Login Form */}
-      <div className="w-1/2 bg-white flex flex-col justify-center px-12">
-        <div className="max-w-md w-full mx-auto">
-          <h2 className="text-3xl font-bold text-black mb-2">Welcome Back!</h2>
-          <p className="text-gray-500 mb-8">Please enter log in details below</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-900 to-purple-700 text-white">
+      <div className="bg-purple-800 bg-opacity-30 rounded-xl shadow-xl flex w-full max-w-5xl overflow-hidden">
 
+        {/* Left Side Welcome */}
+        <div className="w-1/2 p-10 flex flex-col justify-center">
+          <div>
+            <div className="text-4xl font-bold mb-4">Welcome!</div>
+            <p className="text-sm text-purple-200 mb-6">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </p>
+            <button className="bg-gradient-to-r from-pink-500 to-red-500 px-4 py-2 rounded text-white font-semibold">Learn More</button>
+          </div>
+        </div>
+
+        {/* Right Side Login */}
+        <div className="w-1/2 bg-purple-900 bg-opacity-70 p-10 flex flex-col justify-center">
+          <h2 className="text-2xl font-bold mb-6 text-center">Sign in</h2>
           <form onSubmit={handleLogin} className="space-y-6">
             <input
               type="text"
+              placeholder="Roll Number"
               value={rollNo}
               onChange={(e) => setRollNo(e.target.value)}
-              placeholder="Roll Number"
-              className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 bg-purple-700 bg-opacity-30 border border-purple-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
               required
             />
 
-            <div className="text-sm text-gray-600">
-              Wallet:{" "}
-              <span className="text-black font-mono">
-                {walletAddress ? walletAddress : "Not Connected"}
-              </span>
-            </div>
-
+            <div className="text-sm text-gray-300">Wallet: {walletAddress || "Not Connected"}</div>
             <button
               type="button"
               onClick={connectWallet}
-              className="w-full bg-yellow-400 text-black font-semibold p-3 rounded-xl hover:bg-yellow-500 transition"
+              className="w-full bg-yellow-500 text-black font-semibold p-2 rounded hover:bg-yellow-400 transition"
             >
-              Connect MetaMask
+              Connect Wallet
             </button>
 
             <button
               type="submit"
-              className="w-full bg-black text-white font-semibold p-3 rounded-xl hover:bg-gray-900 transition"
+              className="w-full bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold p-2 rounded"
             >
-              Sign In
+              Submit
             </button>
 
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+            {error && <p className="text-red-300 text-sm text-center">{error}</p>}
+
+            <p className="text-sm text-center mt-4 text-purple-200">
+              Don’t have an account?{' '}
+              <Link to="/register" className="text-pink-400 underline">
+                Register here
+              </Link>
+            </p>
+
+            <div className="flex justify-center mt-4 space-x-4 text-white">
+              <i className="fab fa-facebook-f"></i>
+              <i className="fab fa-instagram"></i>
+              <i className="fab fa-pinterest"></i>
+            </div>
           </form>
-
-          <p className="text-sm text-center text-gray-500 mt-6">
-            Don’t have an account?{" "}
-            <span
-              className="text-blue-500 hover:underline cursor-pointer"
-              onClick={() => navigate("/register")}
-            >
-              Sign Up
-            </span>
-          </p>
         </div>
-      </div>
-
-      {/* Right: Illustration */}
-      <div className="w-1/2 bg-black text-white flex flex-col items-center justify-center p-15 rounded-bl-[30px]">
-        <img
-          src="/illustration.png" // <- Use your 3D character or animated graphic here
-          alt="Login Visual"
-          className="w-2/3 mx-auto"
-        />
-        <h3 className="text-2xl font-semibold mt-6">Manage your Certificates Easily</h3>
-        <p className="text-gray-300 mt-2 text-center max-w-sm">
-          Verify blockchain-based university certificates securely.
-        </p>
       </div>
     </div>
   );

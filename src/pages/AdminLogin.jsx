@@ -36,45 +36,68 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow rounded">
-      <h2 className="text-xl font-bold mb-4">Admin Login</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="University ID"
-          value={universityId}
-          onChange={(e) => setUniversityId(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-900 to-purple-700 text-white">
+      <div className="bg-purple-800 bg-opacity-30 rounded-xl shadow-xl flex w-full max-w-5xl overflow-hidden">
 
-        <div className="text-sm text-gray-500">Wallet: {wallet || "Not Connected"}</div>
-        <button
-          type="button"
-          onClick={connectWallet}
-          className="w-full bg-yellow-500 text-white p-2 rounded"
-        >
-          Connect Wallet
-        </button>
+        {/* Left Side Welcome */}
+        <div className="w-1/2 p-10 flex flex-col justify-center">
+          <div>
+            <div className="text-4xl font-bold mb-4">Welcome!</div>
+            <p className="text-sm text-purple-200 mb-6">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </p>
+            <button className="bg-gradient-to-r from-pink-500 to-red-500 px-4 py-2 rounded text-white font-semibold">Learn More</button>
+          </div>
+        </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded"
-        >
-          Login
-        </button>
+        {/* Right Side Login */}
+        <div className="w-1/2 bg-purple-900 bg-opacity-70 p-10 flex flex-col justify-center">
+          <h2 className="text-2xl font-bold mb-6 text-center">Sign in</h2>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <input
+              type="text"
+              placeholder="University ID"
+              value={universityId}
+              onChange={(e) => setUniversityId(e.target.value)}
+              className="w-full px-4 py-2 bg-purple-700 bg-opacity-30 border border-purple-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+              required
+            />
 
-        <p className="text-sm text-center mt-4">
-          Don’t have an account?{" "}
-          <Link to="/admin-register" className="text-blue-500 underline">
-            Register here
-          </Link>
-        </p>
-      </form>
+            <div className="text-sm text-gray-300">Wallet: {wallet || "Not Connected"}</div>
+            <button
+              type="button"
+              onClick={connectWallet}
+              className="w-full bg-yellow-500 text-black font-semibold p-2 rounded hover:bg-yellow-400 transition"
+            >
+              Connect Wallet
+            </button>
+
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold p-2 rounded"
+            >
+              Submit
+            </button>
+
+            {error && <p className="text-red-300 text-sm text-center">{error}</p>}
+
+            <p className="text-sm text-center mt-4 text-purple-200">
+              Don’t have an account?{' '}
+              <Link to="/admin-register" className="text-pink-400 underline">
+                Register here
+              </Link>
+            </p>
+
+            <div className="flex justify-center mt-4 space-x-4 text-white">
+              <i className="fab fa-facebook-f"></i>
+              <i className="fab fa-instagram"></i>
+              <i className="fab fa-pinterest"></i>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };
 
 export default AdminLogin;
-
-

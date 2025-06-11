@@ -1,6 +1,6 @@
 // src/pages/Register.jsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -17,6 +17,15 @@ const Register = () => {
   const [walletAddress, setWalletAddress] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "auto";
+      };
+    }, []);
+
+  
 
   const handleInputChange = (e) => {
     setFormData((prev) => ({
@@ -67,99 +76,50 @@ const Register = () => {
       setError(err.response?.data?.error || "Registration failed.");
     }
   };
+  
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white shadow rounded-lg mt-10">
-      <h2 className="text-2xl font-bold mb-4 text-center">Student Registration</h2>
+    <div className="min-h-screen flex items-center justify-center bg-[#1e002e] px-4">
+      <div className="bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-lg w-full max-w-xl text-white">
+        <h2 className="text-3xl font-bold text-center mb-6">Student Registration</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {["name", "email", "phone", "rollNo", "college", "course"].map((field) => (
+            <input
+              key={field}
+              type={field === "email" ? "email" : "text"}
+              name={field}
+              placeholder={field.replace(/([A-Z])/g, " $1")}
+              value={formData[field]}
+              onChange={handleInputChange}
+              className="w-full p-3 rounded-lg bg-white/10 border border-white/30 placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              required
+            />
+          ))}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="name"
-          placeholder="Full Name"
-          value={formData.name}
-          onChange={handleInputChange}
-          className="w-full border p-2 rounded"
-          required
-        />
+          <div className="text-sm text-gray-300">Wallet: {walletAddress || "Not Connected"}</div>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email Address"
-          value={formData.email}
-          onChange={handleInputChange}
-          className="w-full border p-2 rounded"
-          required
-        />
+          <button
+            type="button"
+            onClick={connectWallet}
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded-lg transition"
+          >
+            Connect MetaMask
+          </button>
 
-        <input
-          type="tel"
-          name="phone"
-          placeholder="Phone Number"
-          value={formData.phone}
-          onChange={handleInputChange}
-          className="w-full border p-2 rounded"
-          required
-        />
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 text-white font-semibold py-3 rounded-lg transition"
+          >
+            Register
+          </button>
 
-        <input
-          type="text"
-          name="rollNo"
-          placeholder="Roll Number"
-          value={formData.rollNo}
-          onChange={handleInputChange}
-          className="w-full border p-2 rounded"
-          required
-        />
-
-        <input
-          type="text"
-          name="college"
-          placeholder="College Name"
-          value={formData.college}
-          onChange={handleInputChange}
-          className="w-full border p-2 rounded"
-          required
-        />
-
-        <input
-          type="text"
-          name="course"
-          placeholder="Course Name"
-          value={formData.course}
-          onChange={handleInputChange}
-          className="w-full border p-2 rounded"
-          required
-        />
-
-        <div className="text-sm text-gray-600">
-          Wallet: {walletAddress ? walletAddress : "Not Connected"}
-        </div>
-
-        <button
-          type="button"
-          onClick={connectWallet}
-          className="w-full bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600"
-        >
-          Connect MetaMask
-        </button>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-        >
-          Register
-        </button>
-
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        {success && <p className="text-green-500 text-sm">{success}</p>}
-      </form>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {success && <p className="text-green-400 text-center text-sm">{success}</p>}
+        </form>
+      </div>
     </div>
   );
 };
 
 export default Register;
-
-
 

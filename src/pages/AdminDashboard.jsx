@@ -1,113 +1,109 @@
 import React, { useEffect, useState } from "react";
-import { ethers } from "ethers";
 import axios from "axios";
 import { CONTRACT_ADDRESS, ABI } from "../blockchain/contractConfig";
+import { ethers } from "ethers";
 
 const UniversityDashboard = () => {
   const [students, setStudents] = useState([]);
-  const [account, setAccount] = useState("");
-  const [contract, setContract] = useState(null);
-  const [status, setStatus] = useState("");
-
-  // 1. Connect wallet and contract
-  const connectWalletAndContract = async () => {
-    try {
-      if (!window.ethereum) return alert("Please install MetaMask!");
-
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contractInstance = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-
-      const accounts = await provider.send("eth_requestAccounts", []);
-      setAccount(accounts[0]);
-      setContract(contractInstance);
-    } catch (err) {
-      console.error("Wallet connection failed:", err);
-    }
-  };
-
-  // 2. Load students from backend
-  const fetchStudents = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/students"); // replace with your actual endpoint
-      setStudents(res.data);
-    } catch (err) {
-      console.error("Error fetching students:", err);
-    }
-  };
-
-  // 3. Upload certificate hash to blockchain
-  const handleUpload = async (walletAddress, certFile) => {
-    try {
-      if (!certFile) return alert("Please select a certificate file");
-
-      // Read file & hash with SHA-256
-      const fileArrayBuffer = await certFile.arrayBuffer();
-      const hashBuffer = await crypto.subtle.digest("SHA-256", fileArrayBuffer);
-      const hashHex = `0x${[...new Uint8Array(hashBuffer)].map(x => x.toString(16).padStart(2, "0")).join("")}`;
-
-      setStatus(`Uploading certificate for ${walletAddress}...`);
-
-      const tx = await contract.uploadCertificate(walletAddress, hashHex);
-      await tx.wait();
-
-      setStatus(`✅ Uploaded certificate hash to blockchain`);
-    } catch (err) {
-      console.error("Upload failed:", err);
-      setStatus("❌ Upload failed. Check console.");
-    }
-  };
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedStudentAddress, setSelectedStudentAddress] = useState(null);
 
   useEffect(() => {
-    connectWalletAndContract();
+    const fetchStudents = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/students");
+        setStudents(res.data);
+      } catch (error) {
+        console.error("Error fetching students", error);
+      }
+    };
     fetchStudents();
   }, []);
 
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  const handleUpload = async (studentWallet) => {
+    if (!selectedFile || !studentWallet) return;
+
+    try {
+      setUploading(true);
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const fileContent = reader.result;
+        const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(fileContent));
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = "0x" + hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+        if (window.ethereum) {
+          const provider = new ethers.BrowserProvider(window.ethereum);
+          const signer = await provider.getSigner();
+          const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+          const tx = await contract.uploadCertificate(studentWallet, hashHex);
+          await tx.wait();
+          alert("Certificate uploaded successfully!");
+        } else {
+          alert("MetaMask not found");
+        }
+      };
+      reader.readAsText(selectedFile);
+    } catch (error) {
+      console.error("Upload failed", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">University Admin Dashboard</h1>
-      <p className="text-green-600 mb-2">{status}</p>
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white rounded shadow">
-          <thead>
-            <tr className="bg-gray-200 text-gray-600 uppercase text-sm">
-              <th className="py-2 px-4">Name</th>
-              <th className="py-2 px-4">Roll No</th>
-              <th className="py-2 px-4">Wallet Address</th>
-              <th className="py-2 px-4">Upload Certificate</th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.map((student) => (
-              <tr key={student._id} className="text-center border-b">
-                <td className="py-2 px-4">{student.name}</td>
-                <td className="py-2 px-4">{student.rollNo}</td>
-                <td className="py-2 px-4">{student.walletAddress}</td>
-                <td className="py-2 px-4">
-                  <label className="cursor-pointer bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
-                    Upload
+    <div className="min-h-screen flex bg-gray-900 text-white">
+      <aside className="w-64 bg-gray-800 p-4">
+        <h1 className="text-2xl font-bold mb-4">University Admin</h1>
+        <nav className="space-y-2">
+          <a href="#" className="block p-2 rounded bg-gray-700">Dashboard</a>
+        </nav>
+      </aside>
+
+      <main className="flex-1 p-6">
+        <h2 className="text-3xl font-semibold mb-6">Student Records</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto bg-gray-800 rounded-lg">
+            <thead>
+              <tr className="bg-gray-700">
+                <th className="px-4 py-2 text-left">Name</th>
+                <th className="px-4 py-2 text-left">Roll No</th>
+                <th className="px-4 py-2 text-left">Wallet</th>
+                <th className="px-4 py-2 text-left">Certificate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((student) => (
+                <tr key={student._id} className="border-b border-gray-600">
+                  <td className="px-4 py-2">{student.name}</td>
+                  <td className="px-4 py-2">{student.rollNo}</td>
+                  <td className="px-4 py-2">{student.walletAddress}</td>
+                  <td className="px-4 py-2">
                     <input
                       type="file"
-                      className="hidden"
-                      accept=".pdf,.jpg,.png"
-                      onChange={(e) =>
-                        handleUpload(student.walletAddress, e.target.files[0])
-                      }
+                      className="text-sm text-gray-300 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-600 file:text-white hover:file:bg-gray-500"
+                      onChange={handleFileChange}
                     />
-                  </label>
-                </td>
-              </tr>
-            ))}
-            {students.length === 0 && (
-              <tr>
-                <td colSpan="4" className="text-center py-4 text-gray-500">
-                  No student data available
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                    <button
+                      onClick={() => handleUpload(student.walletAddress)}
+                      className="ml-2 px-4 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white"
+                      disabled={uploading}
+                    >
+                      {uploading ? "Uploading..." : "Upload"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
     </div>
   );
 };

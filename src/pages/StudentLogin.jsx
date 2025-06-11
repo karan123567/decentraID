@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
 const StudentLogin = () => {
   const [rollNo, setRollNo] = useState("");
   const [error, setError] = useState("");
@@ -38,63 +39,90 @@ const StudentLogin = () => {
       });
 
       if (response.status === 200) {
-        localStorage.setItem("studentName", response.data.name); // store student name
+        localStorage.setItem("studentName", response.data.name);
         navigate("/student-dashboard");
       }
     } catch (err) {
       setError(err.response?.data?.error || "Login failed.");
     }
+useEffect(() => {
+  document.body.style.overflow = "hidden";
+  return () => {
+    document.body.style.overflow = "auto"; // reset on leaving login page
+  };
+}, []);
+
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white shadow rounded-lg mt-10">
-      <h2 className="text-2xl font-bold mb-4 text-center">Student Login</h2>
+    <div className="h-screen w-screen flex overflow-hidden">
+      {/* Left: Login Form */}
+      <div className="w-1/2 bg-white flex flex-col justify-center px-12">
+        <div className="max-w-md w-full mx-auto">
+          <h2 className="text-3xl font-bold text-black mb-2">Welcome Back!</h2>
+          <p className="text-gray-500 mb-8">Please enter log in details below</p>
 
-      <form onSubmit={handleLogin} className="space-y-4">
-        <input
-          type="text"
-          name="rollNo"
-          placeholder="Enter Roll Number"
-          value={rollNo}
-          onChange={(e) => setRollNo(e.target.value)}
-          className="w-full border p-2 rounded"
-          required
-        />
+          <form onSubmit={handleLogin} className="space-y-6">
+            <input
+              type="text"
+              value={rollNo}
+              onChange={(e) => setRollNo(e.target.value)}
+              placeholder="Roll Number"
+              className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
 
-        <div className="text-sm text-gray-600">
-          Wallet: {walletAddress ? walletAddress : "Not Connected"}
+            <div className="text-sm text-gray-600">
+              Wallet:{" "}
+              <span className="text-black font-mono">
+                {walletAddress ? walletAddress : "Not Connected"}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={connectWallet}
+              className="w-full bg-yellow-400 text-black font-semibold p-3 rounded-xl hover:bg-yellow-500 transition"
+            >
+              Connect MetaMask
+            </button>
+
+            <button
+              type="submit"
+              className="w-full bg-black text-white font-semibold p-3 rounded-xl hover:bg-gray-900 transition"
+            >
+              Sign In
+            </button>
+
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          </form>
+
+          <p className="text-sm text-center text-gray-500 mt-6">
+            Don’t have an account?{" "}
+            <span
+              className="text-blue-500 hover:underline cursor-pointer"
+              onClick={() => navigate("/register")}
+            >
+              Sign Up
+            </span>
+          </p>
         </div>
+      </div>
 
-        <button
-          type="button"
-          onClick={connectWallet}
-          className="w-full bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600"
-        >
-          Connect MetaMask
-        </button>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-        >
-          Login
-        </button>
-
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-      </form>
-
-      <p className="text-sm text-center mt-4">
-        Don’t have an account?{" "}
-        <span
-          onClick={() => navigate("/register")}
-          className="text-blue-500 hover:underline cursor-pointer"
-        >
-          Register here
-        </span>
-      </p>
+      {/* Right: Illustration */}
+      <div className="w-1/2 bg-black text-white flex flex-col items-center justify-center p-15 rounded-bl-[30px]">
+        <img
+          src="/illustration.png" // <- Use your 3D character or animated graphic here
+          alt="Login Visual"
+          className="w-2/3 mx-auto"
+        />
+        <h3 className="text-2xl font-semibold mt-6">Manage your Certificates Easily</h3>
+        <p className="text-gray-300 mt-2 text-center max-w-sm">
+          Verify blockchain-based university certificates securely.
+        </p>
+      </div>
     </div>
   );
 };
 
 export default StudentLogin;
-

@@ -11,8 +11,7 @@ const AdminRegister = () => {
     email: "",
     phone: "",
     universityId: "",
-    universityName: "",
-    password: "",
+    universityName: ""
   });
   const [wallet, setWallet] = useState("");
   const [error, setError] = useState("");
@@ -40,7 +39,7 @@ const AdminRegister = () => {
         wallet,
       });
       alert(res.data.message);
-      navigate("/admin-login");
+      navigate("/admin-dashboard");
     } catch (err) {
       alert(err.response?.data?.error || "Registration failed");
     }
@@ -50,7 +49,7 @@ const AdminRegister = () => {
     <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow rounded">
       <h2 className="text-xl font-bold mb-4">Admin Registration</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {["name", "email", "phone", "universityId", "universityName", "password"].map((field) => (
+        {["name", "email", "phone", "universityId", "universityName"].map((field) => (
           <input
             key={field}
             type={field === "email" ? "email" : "text"}
@@ -74,7 +73,7 @@ const AdminRegister = () => {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded"
+          className="w-full bg-blue-600 text-white p-2 rounded hover:cursor-default"
         >
           Register
         </button>

@@ -24,7 +24,7 @@ const AdminLogin = () => {
     if (!wallet) return alert("Connect MetaMask first");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/admin/login", {
+      const res = await axios.post("http://localhost:5000/api/admins/login", {
         universityId,
         wallet,
       });

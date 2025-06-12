@@ -1,7 +1,7 @@
 // /src/context/BlockchainProvider.jsx
 import React, { createContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
-import CertificateVerification from '../Blockchain/contracts/CertificateVerification.sol'
+// import CertificateVerification from '../Blockchain/contracts/CertificateVerification'
 
 export const BlockchainContext = createContext();
 

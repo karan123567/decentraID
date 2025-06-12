@@ -12,6 +12,8 @@ const UniversityDashboard = () => {
   const [studentAddresses, setStudentAddresses] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
   const [wallet, setWallet] = useState("");
+  const [selectedStudentWallet, setSelectedStudentWallet] = useState("");
+  const [selectedStudentId, setSelectedStudentId] = useState("");
 
   useEffect(() => {
     fetchStudents();
@@ -19,7 +21,9 @@ const UniversityDashboard = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/admin/students");
+      const response = await axios.get(
+        "http://localhost:5000/api/admins/students"
+      );
       setStudents(response.data);
     } catch (error) {
       console.error("Error fetching students:", error);
@@ -33,7 +37,7 @@ const UniversityDashboard = () => {
   const handleAddressUpdate = async (studentId) => {
     const address = studentAddresses[studentId];
     try {
-      await axios.put(`http://localhost:5000/api/admin/students/${studentId}`, {
+      await axios.put(`http://localhost:5000/api/admins/students/${studentId}`, {
         physicalAddress: address,
       });
       toast.success("Address updated successfully!");
@@ -46,7 +50,9 @@ const UniversityDashboard = () => {
 
   const connectWallet = async () => {
     if (window.ethereum) {
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
       setWallet(accounts[0]);
     }
   };
@@ -55,11 +61,15 @@ const UniversityDashboard = () => {
     setSelectedFile(e.target.files[0]);
   };
 
-  const handleUpload = async (studentWallet, studentId) => {
-    if (!selectedFile || !studentWallet) {
-      toast.warning("Missing file or wallet address");
+  // Top state hooks (add these near the top)
+
+  // Update this function to upload hash + wallet to blockchain
+  const handleUpload = async () => {
+    if (!selectedFile || !selectedStudentWallet) {
+      toast.warning("Please select a file and student");
       return;
     }
+
     try {
       const reader = new FileReader();
       reader.readAsArrayBuffer(selectedFile);
@@ -67,16 +77,20 @@ const UniversityDashboard = () => {
         const buffer = reader.result;
         const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = "0x" + hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+        const hashHex =
+          "0x" + hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
-        const tx = await contract.uploadCertificate(studentWallet, hashHex);
+        const tx = await contract.uploadCertificate(
+          selectedStudentWallet,
+          hashHex
+        );
         await tx.wait();
 
-        toast.success("Certificate uploaded to blockchain!");
+        toast.success("Certificate hash and wallet uploaded to blockchain!");
       };
     } catch (error) {
       toast.error("Upload failed");
@@ -90,13 +104,17 @@ const UniversityDashboard = () => {
         <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
         <button
           onClick={() => setActiveTab("studentData")}
-          className={`w-full text-left px-4 py-2 rounded ${activeTab === "studentData" ? "bg-gray-700" : "bg-gray-800"}`}
+          className={`w-full text-left px-4 py-2 rounded ${
+            activeTab === "studentData" ? "bg-gray-700" : "bg-gray-800"
+          }`}
         >
           Student Data
         </button>
         <button
           onClick={() => setActiveTab("upload")}
-          className={`w-full text-left px-4 py-2 rounded ${activeTab === "upload" ? "bg-gray-700" : "bg-gray-800"}`}
+          className={`w-full text-left px-4 py-2 rounded ${
+            activeTab === "upload" ? "bg-gray-700" : "bg-gray-800"
+          }`}
         >
           Upload Certificate
         </button>
@@ -135,7 +153,9 @@ const UniversityDashboard = () => {
                             type="text"
                             placeholder="Enter Address"
                             value={studentAddresses[student._id] || ""}
-                            onChange={(e) => handleAddressChange(e, student._id)}
+                            onChange={(e) =>
+                              handleAddressChange(e, student._id)
+                            }
                             className="px-2 py-1 rounded bg-gray-700 text-white"
                           />
                         )}
@@ -168,17 +188,37 @@ const UniversityDashboard = () => {
               Connect Wallet
             </button>
             <form className="space-y-4">
+              <label className="block text-white">Select Student:</label>
+              <select
+                value={selectedStudentId}
+                onChange={(e) => {
+                  const studentId = e.target.value;
+                  setSelectedStudentId(studentId);
+                  const student = students.find((s) => s._id === studentId);
+                  setSelectedStudentWallet(student?.walletAddress || "");
+                }}
+                className="w-full p-2 rounded bg-gray-700 text-white"
+              >
+                <option value="">-- Select a student --</option>
+                {students.map((student) => (
+                  <option key={student._id} value={student._id}>
+                    {student.name} ({student.rollNo})
+                  </option>
+                ))}
+              </select>
+
               <input
                 type="file"
                 onChange={handleFileChange}
                 className="w-full p-2 rounded bg-gray-700 text-white"
               />
+
               <button
                 type="button"
-                onClick={() => handleUpload(wallet, "studentId")}
+                onClick={handleUpload}
                 className="bg-blue-600 px-4 py-2 rounded text-white hover:bg-blue-500"
               >
-                Upload
+                Upload to Blockchain
               </button>
             </form>
           </div>

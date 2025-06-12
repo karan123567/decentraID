@@ -23,7 +23,7 @@ export default function Navbar() {
             studentName && isStudentDashboard ? (
               <span className="text-green-400 font-semibold">{studentName}</span>
             ) : (
-              <Link to="/student" className="hover:text-green-400 transition">Student</Link>
+              <Link to="/student-login" className="hover:text-green-400 transition">Student</Link>
             )
           )}
           {!isStudentDashboard && (

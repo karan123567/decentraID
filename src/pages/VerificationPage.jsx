@@ -1,8 +1,8 @@
 // VerificationPage.jsx
+import { ethers } from "ethers";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { CONTRACT_ADDRESS, ABI } from "../blockchain/contractConfig";
-import { ethers } from "ethers";
+import { CONTRACT_ADDRESS, ABI } from "../Blockchain/contractConfig";
 
 const VerificationPage = () => {
   const [studentAddress, setStudentAddress] = useState("");

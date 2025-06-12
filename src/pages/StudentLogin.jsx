@@ -4,7 +4,7 @@ import axios from "axios";
 
 const StudentLogin = () => {
   const [rollNo, setRollNo] = useState("");
-  const [walletAddress, setWalletAddress] = useState("");
+  const [wallet, setWallet] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -12,27 +12,32 @@ const StudentLogin = () => {
     if (!window.ethereum) return alert("Please install MetaMask.");
     try {
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      setWalletAddress(accounts[0]);
+      setWallet(accounts[0]);
     } catch (err) {
       setError("MetaMask connection failed");
     }
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if (!walletAddress) return alert("Connect MetaMask first");
+ const handleLogin = async (e) => {
+  e.preventDefault();
+  if (!wallet) return alert("Connect MetaMask first");
 
-    try {
-      const res = await axios.post("http://localhost:5000/api/students/login", {
-        rollNo,
-        wallet: walletAddress,
-      });
-      localStorage.setItem("studentName", res.data.name);
-      navigate("/student-dashboard");
-    } catch (err) {
-      setError(err.response?.data?.error || "Login failed");
-    }
-  };
+  try {
+    const res = await axios.post("http://localhost:5000/api/students/login", {
+      rollNo,
+      wallet: wallet,
+    });
+
+    // ✅ Save required values in localStorage for dashboard
+    localStorage.setItem("studentName", res.data.name);
+    localStorage.setItem("studentRollNo", rollNo);
+    localStorage.setItem("walletAddress", wallet);
+
+    navigate("/student-dashboard");
+  } catch (err) {
+    setError(err.response?.data?.error || "Login failed");
+  }
+};
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -70,7 +75,7 @@ const StudentLogin = () => {
               required
             />
 
-            <div className="text-sm text-gray-300">Wallet: {walletAddress || "Not Connected"}</div>
+            <div className="text-sm text-gray-300">Wallet: {wallet || "Not Connected"}</div>
             <button
               type="button"
               onClick={connectWallet}

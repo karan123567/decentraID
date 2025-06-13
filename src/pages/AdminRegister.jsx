@@ -46,7 +46,7 @@ const AdminRegister = () => {
         wallet,
       });
       alert(res.data.message);
-      navigate("/admin-dashboard");
+      navigate("/employer");
     } catch (err) {
       alert(err.response?.data?.error || "Registration failed");
     }

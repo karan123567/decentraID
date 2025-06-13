@@ -1,75 +1,77 @@
 // VerificationPage.jsx
-import { ethers } from "ethers";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { CONTRACT_ADDRESS, ABI } from "../Blockchain/contractConfig";
+import { BrowserProvider, Contract } from "ethers";
+import { useSearchParams } from "react-router-dom";
 
 const VerificationPage = () => {
-  const [studentAddress, setStudentAddress] = useState("");
-  const [hashToCheck, setHashToCheck] = useState("");
-  const [isValid, setIsValid] = useState(null);
+  const [searchParams] = useSearchParams();
+  const [verificationResult, setVerificationResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleVerify = async () => {
-    if (!window.ethereum) return toast.error("MetaMask not detected");
-    if (!studentAddress || !hashToCheck) return toast.error("Fill all fields");
+  const walletParam = searchParams.get("wallet");
+  const hashParam = searchParams.get("hash");
+
+  const verifyCertificate = async () => {
+    if (!walletParam || !hashParam) {
+      toast.error("Invalid or missing verification link parameters.");
+      return;
+    }
+
+    if (!window.ethereum) {
+      toast.error("MetaMask is not detected.");
+      return;
+    }
 
     try {
       setLoading(true);
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-      const result = await contract.verifyHash(studentAddress, hashToCheck);
-      setIsValid(result);
-      toast.success(result ? "Valid Certificate" : "Invalid Certificate");
+      const provider = new BrowserProvider(window.ethereum);
+      const contract = new Contract(CONTRACT_ADDRESS, ABI, provider);
+      const fetchedHash = await contract.getCertificateHash(walletParam);
+
+      if (
+        fetchedHash === "0x0000000000000000000000000000000000000000000000000000000000000000"
+      ) {
+        toast.error("No certificate found for this wallet.");
+        setVerificationResult(false);
+        return;
+      }
+
+      const isMatch = fetchedHash === hashParam;
+      setVerificationResult(isMatch);
+      toast.success(isMatch ? "✅ Certificate Verified" : "❌ Certificate Invalid or Tampered");
     } catch (err) {
-      toast.error("Verification failed");
-      console.error(err);
+      console.error("Verification failed:", err);
+      toast.error("Verification failed.");
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    verifyCertificate();
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white px-4 py-12 flex flex-col items-center justify-center">
-      <div className="w-full max-w-md space-y-6 p-6 rounded-xl bg-gray-800 shadow-lg">
-        <h1 className="text-2xl font-bold text-center">Verify Certificate</h1>
+    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center px-4">
+      <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-lg text-center space-y-4">
+        <h1 className="text-2xl font-bold">Certificate Verification</h1>
 
-        <div>
-          <label className="block mb-1">Student Wallet Address</label>
-          <input
-            type="text"
-            value={studentAddress}
-            onChange={(e) => setStudentAddress(e.target.value)}
-            placeholder="0x..."
-            className="w-full p-2 rounded bg-gray-700 focus:outline-none"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1">Certificate Hash</label>
-          <input
-            type="text"
-            value={hashToCheck}
-            onChange={(e) => setHashToCheck(e.target.value)}
-            placeholder="0x..."
-            className="w-full p-2 rounded bg-gray-700 focus:outline-none"
-          />
-        </div>
-
-        <button
-          onClick={handleVerify}
-          disabled={loading}
-          className="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded transition"
-        >
-          {loading ? "Verifying..." : "Verify"}
-        </button>
-
-        {isValid !== null && (
-          <p className={`text-center font-semibold ${isValid ? "text-green-500" : "text-red-500"}`}>
-            {isValid ? "✅ Certificate is Valid" : "❌ Invalid Certificate"}
-          </p>
+        {loading ? (
+          <p className="text-blue-400">Verifying certificate on blockchain...</p>
+        ) : verificationResult === null ? (
+          <p className="text-yellow-400">Awaiting verification...</p>
+        ) : verificationResult ? (
+          <p className="text-green-500 text-lg font-semibold">✅ Certificate is Valid</p>
+        ) : (
+          <p className="text-red-500 text-lg font-semibold">❌ Certificate is Invalid or Tampered</p>
         )}
+
+        <div className="text-left mt-4 text-sm text-gray-400">
+          <p><strong>Wallet:</strong> {walletParam || "N/A"}</p>
+          <p className="break-all"><strong>Hash:</strong> {hashParam || "N/A"}</p>
+        </div>
       </div>
     </div>
   );

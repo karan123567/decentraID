@@ -5,7 +5,6 @@ import { CONTRACT_ADDRESS, ABI } from "../Blockchain/contractConfig";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import { BlockchainContext } from "../context/BlockchainProvider";
 
 const UniversityDashboard = () => {
   const [activeTab, setActiveTab] = useState("studentData");
@@ -15,6 +14,8 @@ const UniversityDashboard = () => {
   const [wallet, setWallet] = useState("");
   const [selectedStudentWallet, setSelectedStudentWallet] = useState("");
   const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [txHash, setTxHash] = useState("");
+  const [verificationLink, setVerificationLink] = useState("");
 
   useEffect(() => {
     fetchStudents();
@@ -62,9 +63,6 @@ const UniversityDashboard = () => {
     setSelectedFile(e.target.files[0]);
   };
 
-  // Top state hooks (add these near the top)
-
-  // Update this function to upload hash + wallet to blockchain
   const handleUpload = async () => {
     if (!selectedFile || !selectedStudentWallet) {
       toast.warning("Please select a file and student");
@@ -90,6 +88,10 @@ const UniversityDashboard = () => {
           hashHex
         );
         await tx.wait();
+
+        setTxHash(tx.hash);
+        const link = `${window.location.origin}/verify?hash=${hashHex}`;
+        setVerificationLink(link);
 
         toast.success("Certificate hash and wallet uploaded to blockchain!");
       };
@@ -222,6 +224,36 @@ const UniversityDashboard = () => {
                 Upload to Blockchain
               </button>
             </form>
+
+            {txHash && (
+              <div className="mt-6 p-4 bg-green-700 text-white rounded-lg shadow-lg">
+                <p className="font-semibold mb-2">✅ Upload Successful!</p>
+                <p className="break-all">
+                  Transaction Hash:{" "}
+                  <a
+                    href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-blue-200"
+                  >
+                    {txHash}
+                  </a>
+                </p>
+              </div>
+            )}
+
+            {verificationLink && (
+              <div className="mt-4 p-4 bg-gray-700 text-white rounded shadow">
+                <p className="font-semibold mb-1">🔗 Verification Link:</p>
+                <input
+                  type="text"
+                  value={verificationLink}
+                  readOnly
+                  className="w-full bg-gray-900 p-2 rounded mt-1 cursor-pointer text-white"
+                  onClick={(e) => e.target.select()}
+                />
+              </div>
+            )}
           </div>
         )}
       </motion.main>

@@ -6,10 +6,9 @@ import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const UniversityDashboard = () => {
+const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("studentData");
   const [students, setStudents] = useState([]);
-  const [studentAddresses, setStudentAddresses] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
   const [wallet, setWallet] = useState("");
   const [selectedStudentWallet, setSelectedStudentWallet] = useState("");
@@ -23,39 +22,10 @@ const UniversityDashboard = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:5000/api/admins/students"
-      );
+      const response = await axios.get("http://localhost:5000/api/admins/students");
       setStudents(response.data);
     } catch (error) {
       console.error("Error fetching students:", error);
-    }
-  };
-
-  const handleAddressChange = (e, studentId) => {
-    setStudentAddresses({ ...studentAddresses, [studentId]: e.target.value });
-  };
-
-  const handleAddressUpdate = async (studentId) => {
-    const address = studentAddresses[studentId];
-    try {
-      await axios.put(`http://localhost:5000/api/admins/students/${studentId}`, {
-        physicalAddress: address,
-      });
-      toast.success("Address updated successfully!");
-      fetchStudents();
-    } catch (error) {
-      toast.error("Failed to update address");
-      console.error(error);
-    }
-  };
-
-  const connectWallet = async () => {
-    if (window.ethereum) {
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      setWallet(accounts[0]);
     }
   };
 
@@ -76,17 +46,13 @@ const UniversityDashboard = () => {
         const buffer = reader.result;
         const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex =
-          "0x" + hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        const hashHex = "0x" + hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
-        const tx = await contract.uploadCertificate(
-          selectedStudentWallet,
-          hashHex
-        );
+        const tx = await contract.uploadCertificate(selectedStudentWallet, hashHex);
         await tx.wait();
 
         setTxHash(tx.hash);
@@ -140,7 +106,6 @@ const UniversityDashboard = () => {
                     <th className="px-4 py-2">Name</th>
                     <th className="px-4 py-2">Roll No</th>
                     <th className="px-4 py-2">Wallet</th>
-                    <th className="px-4 py-2">Address</th>
                     <th className="px-4 py-2">Actions</th>
                   </tr>
                 </thead>
@@ -149,29 +114,17 @@ const UniversityDashboard = () => {
                     <tr key={student._id} className="border-t border-gray-700">
                       <td className="px-4 py-2">{student.name}</td>
                       <td className="px-4 py-2">{student.rollNo}</td>
-                      <td className="px-4 py-2">{student.walletAddress}</td>
-                      <td className="px-4 py-2">
-                        {student.physicalAddress || (
-                          <input
-                            type="text"
-                            placeholder="Enter Address"
-                            value={studentAddresses[student._id] || ""}
-                            onChange={(e) =>
-                              handleAddressChange(e, student._id)
-                            }
-                            className="px-2 py-1 rounded bg-gray-700 text-white"
-                          />
-                        )}
-                      </td>
+                      <td className="px-4 py-2">{student.wallet}</td>
                       <td className="px-4 py-2 space-x-2">
-                        {!student.physicalAddress && (
-                          <button
-                            onClick={() => handleAddressUpdate(student._id)}
-                            className="bg-blue-600 px-3 py-1 rounded hover:bg-blue-500"
-                          >
-                            Save Address
-                          </button>
-                        )}
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(student.wallet);
+                            toast.success("Wallet address copied to clipboard!");
+                          }}
+                          className="bg-green-600 px-3 py-1 rounded hover:bg-green-500"
+                        >
+                          Copy Wallet
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -184,12 +137,6 @@ const UniversityDashboard = () => {
         {activeTab === "upload" && (
           <div className="max-w-xl mx-auto">
             <h2 className="text-2xl font-bold mb-6">Upload Certificate</h2>
-            <button
-              onClick={connectWallet}
-              className="mb-4 bg-green-600 px-4 py-2 rounded text-white"
-            >
-              Connect Wallet
-            </button>
             <form className="space-y-4">
               <label className="block text-white">Select Student:</label>
               <select
@@ -198,7 +145,7 @@ const UniversityDashboard = () => {
                   const studentId = e.target.value;
                   setSelectedStudentId(studentId);
                   const student = students.find((s) => s._id === studentId);
-                  setSelectedStudentWallet(student?.walletAddress || "");
+                  setSelectedStudentWallet(student?.wallet || "");
                 }}
                 className="w-full p-2 rounded bg-gray-700 text-white"
               >
@@ -213,6 +160,14 @@ const UniversityDashboard = () => {
               <input
                 type="file"
                 onChange={handleFileChange}
+                className="w-full p-2 rounded bg-gray-700 text-white"
+              />
+
+              <input
+                type="text"
+                placeholder="Enter the wallet address"
+                value={selectedStudentWallet}
+                readOnly
                 className="w-full p-2 rounded bg-gray-700 text-white"
               />
 
@@ -261,4 +216,4 @@ const UniversityDashboard = () => {
   );
 };
 
-export default UniversityDashboard;
+export default AdminDashboard;

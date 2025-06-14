@@ -20,24 +20,31 @@ const StudentLogin = () => {
 
  const handleLogin = async (e) => {
   e.preventDefault();
-  if (!wallet) return alert("Connect MetaMask first");
+
+  if (!wallet) {
+    alert("Please connect your MetaMask wallet first.");
+    return;
+  }
 
   try {
     const res = await axios.post("http://localhost:5000/api/students/login", {
       rollNo,
-      wallet: wallet,
+      wallet,
     });
 
-    // ✅ Save required values in localStorage for dashboard
+    // Save student details to localStorage
     localStorage.setItem("studentName", res.data.name);
     localStorage.setItem("studentRollNo", rollNo);
     localStorage.setItem("walletAddress", wallet);
 
+    // Navigate to student dashboard
     navigate("/student-dashboard");
   } catch (err) {
-    setError(err.response?.data?.error || "Login failed");
+    console.error("Login Error:", err);
+    setError(err.response?.data?.error || "Login failed. Please try again.");
   }
 };
+
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -46,19 +53,19 @@ const StudentLogin = () => {
     };
   }, []);
 
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-900 to-purple-700 text-white">
       <div className="bg-purple-800 bg-opacity-30 rounded-xl shadow-xl flex w-full max-w-5xl overflow-hidden">
-
         {/* Left Side Welcome */}
         <div className="w-1/2 p-10 flex flex-col justify-center">
           <div>
             <div className="text-4xl font-bold mb-4">Welcome!</div>
             <p className="text-sm text-purple-200 mb-6">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Access your blockchain-verified certificates.
             </p>
-            <button className="bg-gradient-to-r from-pink-500 to-red-500 px-4 py-2 rounded text-white font-semibold">Learn More</button>
+            <button className="bg-gradient-to-r from-pink-500 to-red-500 px-4 py-2 rounded text-white font-semibold">
+              Learn More
+            </button>
           </div>
         </div>
 
@@ -94,17 +101,11 @@ const StudentLogin = () => {
             {error && <p className="text-red-300 text-sm text-center">{error}</p>}
 
             <p className="text-sm text-center mt-4 text-purple-200">
-              Don’t have an account?{' '}
+              Don’t have an account?{" "}
               <Link to="/register" className="text-pink-400 underline">
                 Register here
               </Link>
             </p>
-
-            <div className="flex justify-center mt-4 space-x-4 text-white">
-              <i className="fab fa-facebook-f"></i>
-              <i className="fab fa-instagram"></i>
-              <i className="fab fa-pinterest"></i>
-            </div>
           </form>
         </div>
       </div>

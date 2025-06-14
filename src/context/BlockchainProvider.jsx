@@ -12,18 +12,34 @@ export const BlockchainProvider = ({ children }) => {
 
   useEffect(() => {
     const init = async () => {
-      if (window.ethereum) {
-        const tempProvider = new BrowserProvider(window.ethereum); // ✅ Replaced Web3Provider
+      if (typeof window.ethereum === "undefined") {
+        alert("Please install MetaMask!");
+        return;
+      }
+
+      try {
+        const accounts = await window.ethereum.request({
+          method: "eth_accounts",
+        });
+
+        // Only call eth_requestAccounts if no account is connected
+        if (accounts.length === 0) {
+          await window.ethereum.request({
+            method: "eth_requestAccounts",
+          });
+        }
+
+        const tempProvider = new BrowserProvider(window.ethereum);
         const tempSigner = await tempProvider.getSigner();
         const tempAccount = await tempSigner.getAddress();
-        const tempContract = new Contract(CONTRACT_ADDRESS, ABI, tempSigner); // ✅ Use Contract from ethers v6
+        const tempContract = new Contract(CONTRACT_ADDRESS, ABI, tempSigner);
 
         setProvider(tempProvider);
         setSigner(tempSigner);
         setAccount(tempAccount);
         setContract(tempContract);
-      } else {
-        alert("Please install MetaMask!");
+      } catch (error) {
+        console.error("MetaMask connection error:", error);
       }
     };
 

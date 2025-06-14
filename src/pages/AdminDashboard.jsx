@@ -1,5 +1,5 @@
-import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
+import { BrowserProvider, Contract } from "ethers"; // ✅ ethers v6 import
 import axios from "axios";
 import { CONTRACT_ADDRESS, ABI } from "../Blockchain/contractConfig";
 import { motion } from "framer-motion";
@@ -10,7 +10,6 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("studentData");
   const [students, setStudents] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [wallet, setWallet] = useState("");
   const [selectedStudentWallet, setSelectedStudentWallet] = useState("");
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [txHash, setTxHash] = useState("");
@@ -42,33 +41,40 @@ const AdminDashboard = () => {
     try {
       const reader = new FileReader();
       reader.readAsArrayBuffer(selectedFile);
+
       reader.onloadend = async () => {
         const buffer = reader.result;
+
+        // 🔐 Hash using SHA-256
         const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = "0x" + hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+        // ✅ Using ethers v6 BrowserProvider
+        const provider = new BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+
+        const contract = new Contract(CONTRACT_ADDRESS, ABI, signer);
 
         const tx = await contract.uploadCertificate(selectedStudentWallet, hashHex);
         await tx.wait();
 
         setTxHash(tx.hash);
-        const link = `${window.location.origin}/verify?hash=${hashHex}`;
+
+        const link = `${window.location.origin}/verify?wallet=${selectedStudentWallet}&hash=${hashHex}`;
         setVerificationLink(link);
 
         toast.success("Certificate hash and wallet uploaded to blockchain!");
       };
     } catch (error) {
       toast.error("Upload failed");
-      console.error(error);
+      console.error("MetaMask or blockchain error:", error);
     }
   };
 
   return (
     <div className="flex flex-col md:flex-row h-screen">
+      {/* Sidebar */}
       <div className="w-full md:w-64 bg-gray-900 text-white p-4 space-y-4">
         <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
         <button
@@ -89,6 +95,7 @@ const AdminDashboard = () => {
         </button>
       </div>
 
+      {/* Main content */}
       <motion.main
         key={activeTab}
         initial={{ opacity: 0, x: 50 }}
@@ -119,7 +126,7 @@ const AdminDashboard = () => {
                         <button
                           onClick={() => {
                             navigator.clipboard.writeText(student.wallet);
-                            toast.success("Wallet address copied to clipboard!");
+                            toast.success("Wallet address copied!");
                           }}
                           className="bg-green-600 px-3 py-1 rounded hover:bg-green-500"
                         >
@@ -165,7 +172,7 @@ const AdminDashboard = () => {
 
               <input
                 type="text"
-                placeholder="Enter the wallet address"
+                placeholder="Wallet Address"
                 value={selectedStudentWallet}
                 readOnly
                 className="w-full p-2 rounded bg-gray-700 text-white"

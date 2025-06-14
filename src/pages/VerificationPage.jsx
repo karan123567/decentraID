@@ -14,40 +14,41 @@ const VerificationPage = () => {
   const hashParam = searchParams.get("hash");
 
   const verifyCertificate = async () => {
-    if (!walletParam || !hashParam) {
-      toast.error("Invalid or missing verification link parameters.");
+  if (!walletParam || !hashParam) {
+    toast.error("Invalid or missing verification link parameters.");
+    return;
+  }
+
+  if (!window.ethereum) {
+    toast.error("MetaMask is not detected.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const provider = new BrowserProvider(window.ethereum);
+    const contract = new Contract(CONTRACT_ADDRESS, ABI, provider);
+
+    const [storedHash, timestamp] = await contract.getCertificateHash(walletParam);
+
+    if (
+      storedHash === "0x0000000000000000000000000000000000000000000000000000000000000000"
+    ) {
+      toast.error("No certificate found for this wallet.");
+      setVerificationResult(false);
       return;
     }
 
-    if (!window.ethereum) {
-      toast.error("MetaMask is not detected.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const provider = new BrowserProvider(window.ethereum);
-      const contract = new Contract(CONTRACT_ADDRESS, ABI, provider);
-      const fetchedHash = await contract.getCertificateHash(walletParam);
-
-      if (
-        fetchedHash === "0x0000000000000000000000000000000000000000000000000000000000000000"
-      ) {
-        toast.error("No certificate found for this wallet.");
-        setVerificationResult(false);
-        return;
-      }
-
-      const isMatch = fetchedHash === hashParam;
-      setVerificationResult(isMatch);
-      toast.success(isMatch ? "✅ Certificate Verified" : "❌ Certificate Invalid or Tampered");
-    } catch (err) {
-      console.error("Verification failed:", err);
-      toast.error("Verification failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const isMatch = storedHash.toLowerCase() === hashParam.toLowerCase();
+    setVerificationResult(isMatch);
+    toast.success(isMatch ? "✅ Certificate Verified" : "❌ Certificate Invalid or Tampered");
+  } catch (err) {
+    console.error("Verification failed:", err);
+    toast.error("Verification failed.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     verifyCertificate();

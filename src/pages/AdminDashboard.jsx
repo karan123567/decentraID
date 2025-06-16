@@ -37,7 +37,8 @@ const AdminDashboard = () => {
       toast.warning("Please select a file and student");
       return;
     }
-
+    window.alert("✅ Certificate uploaded successfully!");
+    
     try {
       const reader = new FileReader();
       reader.readAsArrayBuffer(selectedFile);

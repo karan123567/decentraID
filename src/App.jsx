@@ -14,6 +14,7 @@ import StudentLogin from "./pages/StudentLogin.jsx";
 import Register from "./pages/Register.jsx";
 import AdminLogin from "./pages/AdminLogin.jsx";
 import AdminRegister from "./pages/AdminRegister.jsx";
+import VerifyCertificate from "./pages/VerificationPage.jsx";
 
 
 function App() {
@@ -29,6 +30,8 @@ function App() {
           <Route path="/admin-dashboard" element={<AdminDashboard />}/>
           <Route path="/register" element={<Register />} />
           <Route path="/admin-register" element={<AdminRegister />} />
+          <Route path="/verify" element={<VerifyCertificate />} />
+
         </Routes>
     </>
   );

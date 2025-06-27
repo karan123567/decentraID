@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -17,9 +18,9 @@ const Footer = () => {
         <div>
           <h3 className="text-lg font-semibold mb-2 text-white">Quick Links</h3>
           <ul className="space-y-1 text-sm">
-            <li><a href="/" className="hover:text-white">Home</a></li>
-            <li><a href="/verify" className="hover:text-white">Verify Credentials</a></li>
-            <li><a href="/about" className="hover:text-white">About Us</a></li>
+            <li><Link to="/" className="hover:text-white">Home</Link></li>
+            {/* <li><Link to="/verify" className="hover:text-white">Verify Credentials</Link></li> */}
+            <li><Link to="/about-us" className="hover:text-white">About Us</Link></li>
           </ul>
         </div>
 
@@ -27,17 +28,17 @@ const Footer = () => {
         <div>
           <h3 className="text-lg font-semibold mb-2 text-white">Resources</h3>
           <ul className="space-y-1 text-sm">
-            <li><a href="/terms" className="hover:text-white">Terms of Service</a></li>
-            <li><a href="/privacy" className="hover:text-white">Privacy Policy</a></li>
-            <li><a href="/help" className="hover:text-white">Help & Support</a></li>
+            <li><Link to="/terms" className="hover:text-white">Terms of Service</Link></li>
+            <li><Link to="/privacy-policy" className="hover:text-white">Privacy Policy</Link></li>
+            <li><Link to="/help-support" className="hover:text-white">Help & Support</Link></li>
           </ul>
         </div>
 
-        {/* Contact (Optional) */}
-        <div className="">
+        {/* Contact */}
+        <div>
           <h3 className="text-lg font-semibold mb-2 text-white">Contact</h3>
           <p className="text-sm">Email: support@credentialdapp.com</p>
-          <p className="text-sm">Phone: +91-XXXXXXXXXX</p>
+          <p className="text-sm">Phone: +91-7460076794</p>
         </div>
       </div>
 

@@ -56,7 +56,7 @@ const StudentLogin = () => {
           <div>
             <div className="text-4xl font-bold mb-4">Welcome!</div>
             <p className="text-sm text-purple-200 mb-6">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Say goodbye to fake certificates. Welcome to decentralized verification.
             </p>
             <button className="bg-gradient-to-r from-pink-500 to-red-500 px-4 py-2 rounded text-white font-semibold">Learn More</button>
           </div>

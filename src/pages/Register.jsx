@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import loginIllustration from "../assets/login-illustration.jpg"; // or .svg
 
 const Register = () => {
   const navigate = useNavigate();
@@ -19,13 +20,11 @@ const Register = () => {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = "auto";
-      };
-    }, []);
-
-  
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
 
   const handleInputChange = (e) => {
     setFormData((prev) => ({
@@ -76,50 +75,73 @@ const Register = () => {
       setError(err.response?.data?.error || "Registration failed.");
     }
   };
-  
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#1e002e] px-4">
-      <div className="bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-lg w-full max-w-xl text-white">
-        <h2 className="text-3xl font-bold text-center mb-6">Student Registration</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {["name", "email", "phone", "rollNo", "college", "course"].map((field) => (
-            <input
-              key={field}
-              type={field === "email" ? "email" : "text"}
-              name={field}
-              placeholder={field.replace(/([A-Z])/g, " $1")}
-              value={formData[field]}
-              onChange={handleInputChange}
-              className="w-full p-3 rounded-lg bg-white/10 border border-white/30 placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              required
-            />
-          ))}
+    <div className="max-h-screen bg-[#3e3b52] flex items-center justify-center px-4 py-10">
+      <div className="flex w-full max-w-5xl bg-[#1e1c2c] rounded-3xl shadow-xl overflow-hidden">
+        
+        {/* Left Image Panel */}
+        <div className="w-1/2 hidden md:block">
+          <img
+            src={loginIllustration}
+            alt="Register Illustration"
+            className="h-full w-full object-cover"
+          />
+        </div>
 
-          <div className="text-sm text-gray-300">Wallet: {walletAddress || "Not Connected"}</div>
+        {/* Right Form Panel */}
+        <div className="w-full md:w-1/2 p-10 text-white flex flex-col justify-center">
+          <h2 className="text-3xl font-bold mb-2">Student Registration</h2>
+          <p className="text-sm text-gray-400 mb-6">
+            Already have an account?{" "}
+            <span
+              className="text-purple-400 hover:underline cursor-pointer"
+              onClick={() => navigate("/student-login")}
+            >
+              Login here
+            </span>
+          </p>
 
-          <button
-            type="button"
-            onClick={connectWallet}
-            className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded-lg transition"
-          >
-            Connect MetaMask
-          </button>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {["name", "email", "phone", "rollNo", "college", "course"].map((field) => (
+              <input
+                key={field}
+                type={field === "email" ? "email" : "text"}
+                name={field}
+                placeholder={field.replace(/([A-Z])/g, " $1")}
+                value={formData[field]}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 bg-[#2b293b] border border-gray-600 rounded-lg placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                required
+              />
+            ))}
 
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 text-white font-semibold py-3 rounded-lg transition"
-          >
-            Register
-          </button>
+            <div className="text-sm text-gray-400">
+              Wallet: {walletAddress || "Not Connected"}
+            </div>
 
-          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
-          {success && <p className="text-green-400 text-center text-sm">{success}</p>}
-        </form>
+            <button
+              type="button"
+              onClick={connectWallet}
+              className="w-full bg-yellow-400 text-black font-semibold py-2 rounded-lg hover:bg-yellow-300 transition"
+            >
+              Connect MetaMask Wallet
+            </button>
+
+            <button
+              type="submit"
+              className="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2 rounded-lg transition"
+            >
+              Register
+            </button>
+
+            {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+            {success && <p className="text-green-400 text-center text-sm">{success}</p>}
+          </form>
+        </div>
       </div>
     </div>
   );
 };
 
 export default Register;
-

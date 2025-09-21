@@ -56,13 +56,13 @@ const StudentDashboard = () => {
         throw new Error("Empty or zero hash");
       }
     } catch (error) {
-      const fakeHash =
-        "0x9c1fa3b4f98c2e8d4a78f9a2b4c3d1a9f2b4c3d1a9e4b78f9a2b4c3d1a9e4b78";
+      // const fakeHash =
+      //   "0x9c1fa3b4f98c2e8d4a78f9a2b4c3d1a9f2b4c3d1a9e4b78f9a2b4c3d1a9e4b78";
 
-      setCertHash(fakeHash);
-      const link = `${window.location.origin}/verify?wallet=${walletAddress}&hash=${fakeHash}`;
-      setVerificationLink(link);
-      toast("🧪 Showing demo certificate for submission.");
+      // setCertHash(fakeHash);
+      // const link = `${window.location.origin}/verify?wallet=${walletAddress}&hash=${fakeHash}`;
+      // setVerificationLink(link);
+      // toast("🧪 Showing demo certificate for submission.");
     }
   };
 
